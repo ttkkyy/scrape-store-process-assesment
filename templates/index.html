@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>McDonald's Outlets Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style/style.css" />
+
+</head>
+<body>
+  <header>🍟 McDonald's Malaysia Kuala Lumpur Branches</header>
+
+    <div style="display: flex; height: 92vh;">
+        <div id="chatbox" style="width: 35%; padding: 1rem; border-right: 1px solid #ddd; overflow-y: auto; background: #fff;">
+            <div id="responseBox" style="padding: 1rem; min-height: 50px; background: #f1f1f1; border-radius: 8px;"></div>
+            <div style="display: flex; margin-top: 1rem;">
+                <input id="userInput" placeholder="Ask me something..." style="flex: 1; padding: 10px;">
+                <button id= "searchButton" onclick="handleSearch()" style="padding: 10px;">Send</button>
+            </div>
+        </div>
+        <div id="map" style="flex: 1;"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+
+    <script>
+    const map = L.map('map').setView([3.139, 101.6869], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+    }).addTo(map);
+
+    let outletMarkers = [];
+    let radiusLayer = null;
+    let highlightedMarkers = [];
+    let outletsData = [];
+
+    // Custom marker icons
+    const defaultIcon = L.icon({
+      iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-blue.png",
+      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    const highlightIcon = L.icon({
+      iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-red.png",
+      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    fetch("/api/outlets")
+        .then(res => res.json())
+        .then(data => {
+            const outlets = data.outlets;
+
+            outlets.forEach(outlet => {
+                const lat = parseFloat(outlet.lat);
+                const lng = parseFloat(outlet.lng);
+
+                const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                const wazeLink = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+
+                const popupContent = `
+                    <strong>${outlet.name}</strong><br>
+                    <div class="popup-links">
+                        <a href="${googleMapsLink}" target="_blank">📍 Google Maps</a>
+                        <a href="${wazeLink}" target="_blank">🚗 Waze</a>
+                    </div>
+                `;
+
+                const marker = L.marker([lat, lng], { icon: defaultIcon })
+                    .addTo(map)
+                    .bindPopup(popupContent);
+
+                outletMarkers.push({
+                    marker,
+                    lat,
+                    lng,
+                    outlet
+                });
+                outletsData.push(outlet.name.toLowerCase());
+                marker.on('click', () => {
+                    // Clear existing highlights
+                    if (radiusLayer) {
+                        map.removeLayer(radiusLayer);
+                        radiusLayer = null;
+                    }
+
+                    highlightedMarkers.forEach(m => m.setIcon(defaultIcon));
+                    highlightedMarkers = [];
+
+                    const clickedPoint = turf.point([lng, lat]);
+
+                    // Find nearby outlets
+                    outletMarkers.forEach(other => {
+                        if (other.lat === lat && other.lng === lng) return;
+
+                        const otherPoint = turf.point([other.lng, other.lat]);
+                        const dist = turf.distance(clickedPoint, otherPoint, { units: 'kilometers' });
+
+                        if (dist <= 5) {
+                            other.marker.setIcon(highlightIcon);
+                            highlightedMarkers.push(other.marker);
+                        }
+                    });
+
+                    // Only draw radius if at least one neighbor exists
+                    if (highlightedMarkers.length > 0) {
+                        radiusLayer = L.circle([lat, lng], {
+                            radius: 5000,
+                            color: 'red',
+                            fillOpacity: 0.1
+                        }).addTo(map);
+                    }
+                });
+            });
+        })
+        .catch(err => {
+            console.error("Failed to load outlet data", err);
+        });
+
+        document.getElementById("userInput").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                handleSearch();
+            }
+        });
+
+        async function handleSearch() {
+            const input = document.getElementById("userInput");
+            const button = document.getElementById("searchButton");
+            const responseBox = document.getElementById("responseBox");
+            const query = input.value.trim();
+            if (!query) return;
+
+            // Show loading indicator
+            responseBox.innerHTML = `<em>Searching...</em>`;
+            input.disabled = true;
+            button.disabled = true;
+            try {
+                const res = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query })
+                });
+
+                const data = await res.json();
+                responseBox.innerHTML = `<strong>Result:</strong> ${data.response}`;
+                highlightOutletsFromResponse(data.response);
+            } catch (err) {
+                responseBox.innerHTML = `<span style="color: red;">Error: ${err.message}</span>`;
+            }
+
+            input.value = "";
+            input.disabled = false;
+            button.disabled = false;
+            input.focus();
+        }
+        function highlightOutletsFromResponse(responseText) {
+            // Reset all markers to default first
+            outletMarkers.forEach(({ marker }) => marker.setIcon(defaultIcon));
+            highlightedMarkers = [];
+
+            // Normalize response text and search for outlet names
+            const lowerText = responseText.toLowerCase();
+            if (highlightedMarkers.length > 0) {
+                const group = L.featureGroup(highlightedMarkers);
+                map.fitBounds(group.getBounds().pad(0.2));
+            }
+            outletMarkers.forEach(({ marker, outlet }) => {
+                const outletName = outlet.name.toLowerCase();
+                if (lowerText.includes(outletName)) {
+                    marker.setIcon(highlightIcon);
+                    highlightedMarkers.push(marker);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8;
+}
+
+header {
+    background-color: #ffcc00;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#map {
+    height: 92vh;
+    width: 100%;
+}
+
+.popup-links a {
+    display: block;
+    margin-top: 4px;
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.popup-links a:hover {
+    text-decoration: underline;
+}
+  
+#responseBox {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    margin-top: 10px;
+}
