@@ -8,7 +8,9 @@ import api
 import os 
 import chatbot
 from dotenv import load_dotenv
-load_dotenv()
+from init import init_db
+load_dotenv() # Load environment variables
+init_db()  # Initialize the database    
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
