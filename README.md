@@ -1,3 +1,6 @@
+Project is hosted on Render :
+https://scrape-store-process-assesment.onrender.com/
+
 Python Package Dependencies 🧰
 - requests-html (Perform REST requests)
 - lxml-html-clean (Extension for requests-html)
