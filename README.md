@@ -2,6 +2,7 @@ Python Package Dependencies 🧰
 - requests-html (Perform REST requests)
 - lxml-html-clean (Extension for requests-html)
 - mysql-connector-python (Database connector [depends on database]) 
+- psycopg2-binary (Postgres Db was used for deployment)
 - fastapi (Web building framework)
 - uvicorn (ASGI web server implementation)
 - python-dotenv (allow usage of .env file) 
@@ -65,3 +66,4 @@ File Structure 📁 : <br>
 <br>	|--- scraper.py [Web Scraping file, host for web scraping applications]
 <br>	|--- README.md 
 <br> |--- .env [env file, Stores important config information]
+<br> |--- requirements.txt [package dependencies files]
