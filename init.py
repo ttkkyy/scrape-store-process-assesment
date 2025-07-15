@@ -28,21 +28,31 @@ def get_connection():
     """Retrieve a pooled connection to the database."""
     return psycopg2.connect(os.getenv("DATABASE_URL"))
 
+def table_exists(cursor, table_name):
+    cursor.execute("""
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' AND table_name = %s
+        );
+    """, (table_name,))
+    return cursor.fetchone()[0]
+
 def init_db():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-
-        try:
-            # Try a quick query to test if the tables exist
-            cursor.execute("SELECT 1 FROM mc_store LIMIT 1;")
-            cursor.execute("SELECT 1 FROM mc_store_fac LIMIT 1;")
-        except psycopg2.Error:
-            run_sql_file(cursor, BASE_SQL_PATH)
-            conn.commit()            
-        finally:
-            cursor.close()
-            conn.close()
+        store_exists = table_exists(cursor, 'mc_store')
+        fac_exists = table_exists(cursor, 'mc_store_fac')
+        if not (store_exists and fac_exists):
+            try:
+                run_sql_file(cursor, BASE_SQL_PATH)
+                conn.commit()       
+            except Exception as e:
+                conn.rollback()     
+                raise 
+            finally:
+                cursor.close()
+                conn.close()
 
     except Exception as e:
        raise
