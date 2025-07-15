@@ -7,8 +7,7 @@ Python Package Dependencies 🧰
 - python-dotenv (allow usage of .env file) 
 
 Project Preface : <hr>
-asdfas
-
+This assestment is prepared by MindHive, an AI Automation service company. Despite being really rusty at Python, the project was first attempted without using an AI assistance tools (Chatbot etc), after trying multiple days without AI, the task seemingly took too long. With assistance from AI Tools and chatbot additionally with basic understanding on the language python, this project is done with ease despite not knowing many libraries and methods on doing certain functionalities and methods. AI seemingly done wonders and proved to be of great assisstant if used correctly.  
 
 Project Requirements 🛠️: <hr>
 Part 1: Web Scraping and Database Storage
@@ -44,14 +43,25 @@ Part 6: Documentation and Instructions
 Provide documentation with setup instructions, key technical decisions (frameworks, libraries,
 architecture) with reasoning, and essential information to understand and use the solution.
 
+Project Setup and screenshots 📃: <hr>
+Project can be easily start up using uvicorn by opening a server on an existing port [uvicorn main:app --host 0.0.0.0 --port 8000 --reload]
+scraper.py can be upgraded to use selenium if the scrapped data is complicated to retrieve
+
+
+Catchment (2.5 km instead of 5 because each Mcdonalds are too close to each other) 
+<img width="1182" height="870" alt="image" src="https://github.com/user-attachments/assets/b9c16a35-e30e-46d9-b8de-c1171edc9244" />
+
+Chat Query (with auto highlighting of outlet)
+<img width="1754" height="882" alt="image" src="https://github.com/user-attachments/assets/3bf92b6d-fb8e-456c-88ca-c73989133eda" />
+
 File Structure 📁 : <br>
  	/app
-<br>	|--- /db  --- base.sql
-<br>	|--- /style --- style.css
-<br> 	|--- /templates ---  index.html	
-<br>	|--- main.py
-<br>	|--- api.py
-<br>	|--- init.py
-<br>	|--- scraper.py
-<br>	|--- README.md
-
+<br>	|--- /db  --- base.sql   [Base SQL to run on initiliazation]
+<br>	|--- /style --- style.css  [Frontend styling for web pages]
+<br> |--- /templates ---  index.html	 [Main page for web application]
+<br>	|--- main.py [Main file, hosts for index.html]
+<br>	|--- api.py [API file, hosts for application's API]
+<br>	|--- init.py [Initialization file, holds application start and initialization needs (database ,etc)]
+<br>	|--- scraper.py [Web Scraping file, host for web scraping applications]
+<br>	|--- README.md 
+<br> |--- .env [env file, Stores important config information]
