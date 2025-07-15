@@ -7,10 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import api
 import os 
 import chatbot
+from scraper import web_scrape 
 from dotenv import load_dotenv
 from init import init_db
 load_dotenv() # Load environment variables
 init_db()  # Initialize the database    
+web_scrape()  # Run the web scraping function to populate the database
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,

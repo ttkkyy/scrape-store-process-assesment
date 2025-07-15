@@ -14,7 +14,7 @@ def get_outlets():
     db = get_connection()
     cursor = db.cursor()
     try :
-        cursor.execute("SELECT mc_id, mc_name , mc_address, mc_email, mc_latitude, mc_longtitude , mc_telephone FROM mc_store")
+        cursor.execute("SELECT mc_id, mc_name , mc_address, mc_email, mc_latitude, mc_longitude , mc_telephone FROM mc_store")
         rows = cursor.fetchall()
         cursor.execute("select string_agg(mcf_cat_name, ', ') , mcf_store_id  from mc_store_fac group by mcf_store_id")
         rows_fac = cursor.fetchall()

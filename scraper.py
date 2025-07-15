@@ -52,7 +52,7 @@ def store_to_db(store_data):
             return
 
         cursor.execute('''
-            INSERT INTO mc_store (mc_name, mc_address, mc_address_line ,mc_state, mc_city, mc_postcode, mc_email, mc_latitude, mc_longtitude, mc_telephone)
+            INSERT INTO mc_store (mc_name, mc_address, mc_address_line ,mc_state, mc_city, mc_postcode, mc_email, mc_latitude, mc_longitude, mc_telephone)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
             store_data["name"],
@@ -86,47 +86,47 @@ def store_to_db(store_data):
         cursor.close()
         db.close() # Closes the connection each time
 
-
-url = 'https://www.mcdonalds.com.my/storefinder/index.php'
-data = {
-    'ajax' : '1',
-    'action': 'get_nearby_stores',
-    'lat' : '',
-    'lng' : '',
-    'state' : '',
-    'distance': '100000',
-    'state': 'Kuala Lumpur',
-    'address': 'Kuala Lumpur, Malaysia',
-    'issuggestion' :0,
-    'islocateus': 0
-}
-
-response = session.post(url, data=data)
-if (response.status_code != 200):
-   sys.exit(); 
-mcd_data = json.loads(response.content.decode('utf-8-sig'))
-
-for store in mcd_data['stores']:
-    # Extract and clean the address
-    address_line, postcode, city, state = split_address(store['address'])
-    
-    # Prepare data for database insertion
-    store_data = {
-        "name": store["name"],
-        "address":  store["address"],
-        "address_line": address_line,
-        "telephone": store["telephone"],
-        "email": store["email"],
-        "website": store["website"],
-        "fax": store["fax"],
-        "description": store["description"],
-        "lat": store["lat"],
-        "lng": store["lng"],
-        "default_media": store.get("default_media", ""),
-        "postcode": postcode,
-        "state": state,
-        "city": city,
-        "categories": store["cat"]
+def web_scrape() :
+    url = 'https://www.mcdonalds.com.my/storefinder/index.php'
+    data = {
+        'ajax' : '1',
+        'action': 'get_nearby_stores',
+        'lat' : '',
+        'lng' : '',
+        'state' : '',
+        'distance': '100000',
+        'state': 'Kuala Lumpur',
+        'address': 'Kuala Lumpur, Malaysia',
+        'issuggestion' :0,
+        'islocateus': 0
     }
-    
-    store_to_db(store_data)
+
+    response = session.post(url, data=data)
+    if (response.status_code != 200):
+        raise
+    mcd_data = json.loads(response.content.decode('utf-8-sig'))
+
+    for store in mcd_data['stores']:
+        # Extract and clean the address
+        address_line, postcode, city, state = split_address(store['address'])
+        
+        # Prepare data for database insertion
+        store_data = {
+            "name": store["name"],
+            "address":  store["address"],
+            "address_line": address_line,
+            "telephone": store["telephone"],
+            "email": store["email"],
+            "website": store["website"],
+            "fax": store["fax"],
+            "description": store["description"],
+            "lat": store["lat"],
+            "lng": store["lng"],
+            "default_media": store.get("default_media", ""),
+            "postcode": postcode,
+            "state": state,
+            "city": city,
+            "categories": store["cat"]
+        }
+        
+        store_to_db(store_data)
