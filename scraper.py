@@ -64,7 +64,7 @@ def store_to_db(store_data):
             store_data["email"],
             float(store_data["lat"]),
             float(store_data["lng"]),
-            store_data["telephone"]
+            str(store_data["telephone"])
         ))
         store_id = cursor.lastrowid
 
