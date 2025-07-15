@@ -54,6 +54,7 @@ def store_to_db(store_data):
         cursor.execute('''
             INSERT INTO mc_store (mc_name, mc_address, mc_address_line ,mc_state, mc_city, mc_postcode, mc_email, mc_latitude, mc_longitude, mc_telephone)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING mc_id
             ''', (
             store_data["name"],
             store_data["address"],
@@ -66,7 +67,7 @@ def store_to_db(store_data):
             float(store_data["lng"]),
             str(store_data["telephone"])
         ))
-        store_id = cursor.lastrowid
+        store_id = cursor.fetchone()[0]
 
         for category in store_data["categories"]:
             cursor.execute('''
