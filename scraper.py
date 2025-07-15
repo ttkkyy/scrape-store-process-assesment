@@ -53,7 +53,7 @@ def store_to_db(store_data):
 
         cursor.execute('''
             INSERT INTO mc_store (mc_name, mc_address, mc_address_line ,mc_state, mc_city, mc_postcode, mc_email, mc_latitude, mc_longitude, mc_telephone)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
             store_data["name"],
             store_data["address"],
